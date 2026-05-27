@@ -2,11 +2,24 @@
 // ADMIN LOGIN — login.js
 // ===========================
 
+// Determine the backend base URL dynamically (e.g. if accessed via Live Server or VPS ports)
+const getBackendUrl = () => {
+    const { protocol, hostname, port } = window.location;
+    if (port === '3008') {
+        return `${protocol}//${hostname}:5005`;
+    }
+    if (port && port !== '3000') {
+        return `${protocol}//${hostname}:3000`;
+    }
+    return '';
+};
+const BACKEND_URL = getBackendUrl();
+
 // If already logged in, redirect to admin
 const existingToken = localStorage.getItem('admin_token');
 if (existingToken) {
     // Verify token is still valid
-    fetch('/api/auth/verify', {
+    fetch(`${BACKEND_URL}/api/auth/verify`, {
         headers: { Authorization: `Bearer ${existingToken}` },
     })
         .then(res => res.json())
@@ -54,7 +67,7 @@ form.addEventListener('submit', async (e) => {
     btnLoader.classList.remove('hidden');
 
     try {
-        const res = await fetch('/api/auth/login', {
+        const res = await fetch(`${BACKEND_URL}/api/auth/login`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ username, password }),

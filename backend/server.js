@@ -36,7 +36,11 @@ function startPythonServer() {
 
     pythonServer = spawn(pythonExecutable, ['scripts/rembg_server.py'], {
         cwd: __dirname,
-        stdio: ['ignore', 'pipe', 'pipe']
+        stdio: ['ignore', 'pipe', 'pipe'],
+        env: {
+            ...process.env,
+            PORT: '5001' // Ensure Python doesn't inherit Express server's PORT (3000)
+        }
     });
 
     pythonServer.stdout.on('data', (data) => {

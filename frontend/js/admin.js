@@ -2,6 +2,19 @@
 // ADMIN PANEL — admin.js
 // ===========================
 
+// Determine the backend base URL dynamically (e.g. if accessed via Live Server or VPS ports)
+const getBackendUrl = () => {
+    const { protocol, hostname, port } = window.location;
+    if (port === '3008') {
+        return `${protocol}//${hostname}:5005`;
+    }
+    if (port && port !== '3000') {
+        return `${protocol}//${hostname}:3000`;
+    }
+    return '';
+};
+const BACKEND_URL = getBackendUrl();
+
 // ===========================
 // AUTH GUARD — redirect to login if no token
 // ===========================
@@ -33,7 +46,7 @@ function authHeadersNoJSON() {
     }
 
     try {
-        const res = await fetch('/api/auth/verify', {
+        const res = await fetch(`${BACKEND_URL}/api/auth/verify`, {
             headers: { Authorization: `Bearer ${token}` },
         });
         const data = await res.json();
@@ -53,7 +66,7 @@ function authHeadersNoJSON() {
 })();
 
 function initAdmin() {
-    const socket = io();
+    const socket = io(BACKEND_URL);
     console.log('[ADMIN] Socket.IO connecting...');
 
     socket.on('connect', () => {
@@ -115,7 +128,7 @@ function initAdmin() {
     // ===========================
     async function loadImages() {
         try {
-            const res = await fetch('/api/admin/images', {
+            const res = await fetch(`${BACKEND_URL}/api/admin/images`, {
                 headers: authHeadersNoJSON(),
             });
 
@@ -222,7 +235,7 @@ function initAdmin() {
     // ===========================
     async function archiveImage(id) {
         try {
-            const res = await fetch(`/api/admin/images/${id}/archive`, {
+            const res = await fetch(`${BACKEND_URL}/api/admin/images/${id}/archive`, {
                 method: 'PATCH',
                 headers: authHeadersNoJSON(),
             });
@@ -250,7 +263,7 @@ function initAdmin() {
     // ===========================
     async function restoreImage(id) {
         try {
-            const res = await fetch(`/api/admin/images/${id}/restore`, {
+            const res = await fetch(`${BACKEND_URL}/api/admin/images/${id}/restore`, {
                 method: 'PATCH',
                 headers: authHeadersNoJSON(),
             });
@@ -300,7 +313,7 @@ function initAdmin() {
         console.log('[ADMIN] Deleting image id:', idToDelete);
 
         try {
-            const res = await fetch(`/api/admin/images/${idToDelete}`, {
+            const res = await fetch(`${BACKEND_URL}/api/admin/images/${idToDelete}`, {
                 method: 'DELETE',
                 headers: authHeadersNoJSON(),
             });
@@ -344,7 +357,7 @@ function initAdmin() {
     resetModalConfirm.addEventListener('click', async () => {
         resetModalOverlay.classList.remove('visible');
         try {
-            const res = await fetch('/api/admin/reset', {
+            const res = await fetch(`${BACKEND_URL}/api/admin/reset`, {
                 method: 'DELETE',
                 headers: authHeadersNoJSON(),
             });
@@ -395,7 +408,7 @@ function initAdmin() {
         if (!pendingEditId) return;
         const text = editTextInput.value.slice(0, 20);
         try {
-            const res = await fetch(`/api/admin/images/${pendingEditId}`, {
+            const res = await fetch(`${BACKEND_URL}/api/admin/images/${pendingEditId}`, {
                 method: 'PUT',
                 headers: authHeaders(),
                 body: JSON.stringify({ text }),

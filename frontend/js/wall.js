@@ -2,7 +2,20 @@
 // SOCIAL WALL — wall.js
 // ===========================
 
-const socket = io();
+// Determine the backend base URL dynamically (e.g. if accessed via Live Server or VPS ports)
+const getBackendUrl = () => {
+    const { protocol, hostname, port } = window.location;
+    if (port === '3008') {
+        return `${protocol}//${hostname}:5005`;
+    }
+    if (port && port !== '3000') {
+        return `${protocol}//${hostname}:3000`;
+    }
+    return '';
+};
+const BACKEND_URL = getBackendUrl();
+
+const socket = io(BACKEND_URL);
 console.log('[WALL] Socket.IO connecting...');
 
 socket.on('connect', () => {
@@ -198,7 +211,7 @@ socket.on('reset-wall', () => {
 // ===========================
 async function loadImages() {
     try {
-        const res = await fetch('/api/images');
+        const res = await fetch(`${BACKEND_URL}/api/images`);
         const images = await res.json();
         allImages = images;
         renderWall();

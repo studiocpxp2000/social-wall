@@ -2,6 +2,19 @@
 // CAMERA PAGE — camera.js
 // ===========================
 
+// Determine the backend base URL dynamically (e.g. if accessed via Live Server or VPS ports)
+const getBackendUrl = () => {
+    const { protocol, hostname, port } = window.location;
+    if (port === '3008') {
+        return `${protocol}//${hostname}:5005`;
+    }
+    if (port && port !== '3000') {
+        return `${protocol}//${hostname}:3000`;
+    }
+    return '';
+};
+const BACKEND_URL = getBackendUrl();
+
 const screens = {
     start: document.getElementById('start-screen'),
     inactive: document.getElementById('inactive-screen'),
@@ -172,7 +185,7 @@ uploadBtn.addEventListener('click', async () => {
         formData.append('image', capturedBlob, 'photo.png');
         formData.append('text', text.slice(0, 20));
 
-        const response = await fetch('/api/upload', {
+        const response = await fetch(`${BACKEND_URL}/api/upload`, {
             method: 'POST',
             body: formData,
         });
@@ -212,7 +225,7 @@ newPhotoBtn.addEventListener('click', () => {
 // ===========================
 // INIT & SOCKET LISTENERS
 // ===========================
-const socket = io();
+const socket = io(BACKEND_URL);
 let isCameraActiveGlobal = true;
 
 // Initial connection
