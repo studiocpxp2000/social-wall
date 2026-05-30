@@ -215,6 +215,7 @@ body {
   position: relative;
 }
 
+#name-input,
 #caption-input {
   width: 100%;
   padding: 14px 60px 14px 18px;
@@ -228,22 +229,38 @@ body {
   transition: border-color 0.2s;
 }
 
+#caption-input {
+  min-height: 96px;
+  resize: none;
+  line-height: 1.35;
+}
+
+#name-input:focus,
 #caption-input:focus {
   border-color: var(--accent);
 }
 
+#name-input::placeholder,
 #caption-input::placeholder {
   color: var(--text-secondary);
 }
 
-#char-count {
+#name-count,
+#feedback-count {
   position: absolute;
   right: 14px;
-  top: 50%;
-  transform: translateY(-50%);
   font-size: 12px;
   color: var(--text-secondary);
   font-weight: 500;
+}
+
+#name-count {
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+#feedback-count {
+  bottom: 12px;
 }
 
 /* ===========================
@@ -307,6 +324,7 @@ body {
   display: block;
 }
 
+#name-input.input-error,
 #caption-input.input-error {
   border-color: var(--danger);
 }

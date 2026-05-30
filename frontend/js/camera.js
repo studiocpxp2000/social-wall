@@ -31,8 +31,10 @@ const closeCameraBtn = document.getElementById('close-camera-btn');
 const openCameraBtn = document.getElementById('open-camera-btn');
 const switchCameraBtn = document.getElementById('switch-camera-btn');
 const previewImage = document.getElementById('preview-image');
+const nameInput = document.getElementById('name-input');
 const captionInput = document.getElementById('caption-input');
-const charCount = document.getElementById('char-count');
+const nameCount = document.getElementById('name-count');
+const feedbackCount = document.getElementById('feedback-count');
 const textError = document.getElementById('text-error');
 const retakeBtn = document.getElementById('retake-btn');
 const uploadBtn = document.getElementById('upload-btn');
@@ -44,6 +46,8 @@ const spinner = document.getElementById('upload-spinner');
 let currentStream = null;
 let facingMode = 'user';
 let capturedBlob = null;
+const NAME_CHAR_LIMIT = 30;
+const FEEDBACK_CHAR_LIMIT = 70;
 
 // ===========================
 // SCREEN NAVIGATION
@@ -126,34 +130,55 @@ captureBtn.addEventListener('click', () => {
 });
 
 // ===========================
-// TEXT INPUT — Required, max 20
+// TEXT INPUT - Required, character limited
 // ===========================
-captionInput.addEventListener('input', () => {
-    const len = captionInput.value.trim().length;
-    charCount.textContent = `${captionInput.value.length}/20`;
-
-    if (len > 0 && len <= 20) {
-        uploadBtn.disabled = false;
-        uploadBtn.classList.remove('btn-disabled');
-        textError.classList.remove('visible');
-        captionInput.classList.remove('input-error');
-    } else {
-        uploadBtn.disabled = true;
-        uploadBtn.classList.add('btn-disabled');
+function limitChars(input, maxChars) {
+    if (input.value.length > maxChars) {
+        input.value = input.value.slice(0, maxChars);
     }
-});
+}
+
+function updateFormState() {
+    limitChars(nameInput, NAME_CHAR_LIMIT);
+    limitChars(captionInput, FEEDBACK_CHAR_LIMIT);
+
+    const nameLength = nameInput.value.trim().length;
+    const feedbackLength = captionInput.value.trim().length;
+    const isValid = nameLength > 0 && feedbackLength > 0;
+
+    nameCount.textContent = `${nameInput.value.length}/${NAME_CHAR_LIMIT}`;
+    feedbackCount.textContent = `${captionInput.value.length}/${FEEDBACK_CHAR_LIMIT}`;
+    uploadBtn.disabled = !isValid;
+    uploadBtn.classList.toggle('btn-disabled', !isValid);
+
+    if (isValid) {
+        textError.classList.remove('visible');
+        nameInput.classList.remove('input-error');
+        captionInput.classList.remove('input-error');
+    }
+}
+
+function resetPreviewForm() {
+    nameInput.value = '';
+    captionInput.value = '';
+    nameCount.textContent = `0/${NAME_CHAR_LIMIT}`;
+    feedbackCount.textContent = `0/${FEEDBACK_CHAR_LIMIT}`;
+    uploadBtn.disabled = true;
+    uploadBtn.classList.add('btn-disabled');
+    textError.classList.remove('visible');
+    nameInput.classList.remove('input-error');
+    captionInput.classList.remove('input-error');
+}
+
+nameInput.addEventListener('input', updateFormState);
+captionInput.addEventListener('input', updateFormState);
 
 // ===========================
 // RETAKE
 // ===========================
 retakeBtn.addEventListener('click', () => {
     capturedBlob = null;
-    captionInput.value = '';
-    charCount.textContent = '0/20';
-    uploadBtn.disabled = true;
-    uploadBtn.classList.add('btn-disabled');
-    textError.classList.remove('visible');
-    captionInput.classList.remove('input-error');
+    resetPreviewForm();
     URL.revokeObjectURL(previewImage.src);
     showScreen('camera');
     startCamera(); // Make sure camera stream starts again when returning
@@ -165,11 +190,13 @@ retakeBtn.addEventListener('click', () => {
 uploadBtn.addEventListener('click', async () => {
     if (!capturedBlob) return;
 
-    const text = captionInput.value.trim();
-    if (!text) {
+    const name = nameInput.value.trim();
+    const feedback = captionInput.value.trim();
+    if (!name || !feedback) {
         textError.classList.add('visible');
-        captionInput.classList.add('input-error');
-        captionInput.focus();
+        nameInput.classList.toggle('input-error', !name);
+        captionInput.classList.toggle('input-error', !feedback);
+        (!name ? nameInput : captionInput).focus();
         return;
     }
 
@@ -183,7 +210,7 @@ uploadBtn.addEventListener('click', async () => {
 
         const formData = new FormData();
         formData.append('image', capturedBlob, 'photo.png');
-        formData.append('text', text.slice(0, 20));
+        formData.append('text', feedback.slice(0, FEEDBACK_CHAR_LIMIT));
 
         const response = await fetch(`${BACKEND_URL}/api/upload`, {
             method: 'POST',
@@ -213,12 +240,7 @@ uploadBtn.addEventListener('click', async () => {
 // ===========================
 newPhotoBtn.addEventListener('click', () => {
     capturedBlob = null;
-    captionInput.value = '';
-    charCount.textContent = '0/20';
-    uploadBtn.disabled = true;
-    uploadBtn.classList.add('btn-disabled');
-    textError.classList.remove('visible');
-    captionInput.classList.remove('input-error');
+    resetPreviewForm();
     showScreen('camera');
 });
 

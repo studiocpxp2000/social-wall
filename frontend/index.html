@@ -91,11 +91,16 @@
         <img id="preview-image" alt="Your photo preview">
       </div>
       <div class="text-input-wrap">
-        <input type="text" id="caption-input" maxlength="20" placeholder="Add your text (required, max 20)"
-          autocomplete="off">
-        <span id="char-count">0/20</span>
+        <input type="text" id="name-input" maxlength="30" placeholder="Your name (max 30 characters)"
+          autocomplete="name">
+        <span id="name-count">0/30</span>
       </div>
-      <p class="text-error" id="text-error">Please add some text before uploading</p>
+      <div class="text-input-wrap">
+        <textarea id="caption-input" rows="3" maxlength="70" placeholder="Your feedback (max 70 characters)"
+          autocomplete="off"></textarea>
+        <span id="feedback-count">0/70</span>
+      </div>
+      <p class="text-error" id="text-error">Please add your name and feedback before uploading</p>
     </div>
     <div class="action-bar preview-actions">
       <button id="retake-btn" class="btn btn-secondary">

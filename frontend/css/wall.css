@@ -24,7 +24,7 @@
     --header-height: 10vh;
     --row-height: 19vh;
     --card-radius: 20vh;
-    --marquee-speed: 35s;
+    --marquee-speed: 120s;
 }
 
 html,
@@ -141,7 +141,8 @@ body {
     border-radius: var(--card-radius);
     padding: 1.5vh 4vh 1.5vh 1.5vh;
     height: 13.5vh;
-    min-width: max-content;
+    width: fit-content;
+    max-width: 70vw;
     box-shadow: 0 0.5vh 2vh rgba(0, 0, 0, 0.08);
     transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
     flex-shrink: 0;
@@ -188,7 +189,14 @@ body {
     font-size: 3vh;
     font-weight: 600;
     color: var(--text-dark);
-    white-space: nowrap;
+    display: -webkit-box;
+    max-width: calc(70vw - 18vh);
+    line-height: 1.12;
+    overflow: hidden;
+    overflow-wrap: anywhere;
+    white-space: normal;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
     letter-spacing: -0.05vh;
 }
 

@@ -406,7 +406,7 @@ function initAdmin() {
 
     editSave.addEventListener('click', async () => {
         if (!pendingEditId) return;
-        const text = editTextInput.value.slice(0, 20);
+        const text = editTextInput.value.trim().slice(0, 70);
         try {
             const res = await fetch(`${BACKEND_URL}/api/admin/images/${pendingEditId}`, {
                 method: 'PUT',
