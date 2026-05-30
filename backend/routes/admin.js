@@ -40,7 +40,7 @@ router.put('/images/:id', (req, res) => {
         const image = getImageById(Number(id));
         if (!image) return res.status(404).json({ error: 'Image not found' });
 
-        const trimmedText = (text || '').slice(0, 20);
+        const trimmedText = (text || '').trim().slice(0, 70);
         const updated = updateImageText(Number(id), trimmedText);
 
         const io = req.app.get('io');

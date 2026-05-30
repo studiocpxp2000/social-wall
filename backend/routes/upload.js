@@ -65,7 +65,7 @@ router.post('/', upload.single('image'), async (req, res) => {
 
         console.log('[UPLOAD] File received:', req.file.originalname, req.file.size, 'bytes');
 
-        const text = (req.body.text || '').slice(0, 20);
+        const text = (req.body.text || '').trim().slice(0, 70);
         const bgColor = getRandomColor();
 
         // Convert hex color to RGB for Sharp
