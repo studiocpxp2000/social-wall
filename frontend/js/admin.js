@@ -89,6 +89,7 @@ function initAdmin() {
     const statArchived = document.getElementById('stat-archived');
     const logoutBtn = document.getElementById('logout-btn');
     const cameraToggleBtn = document.getElementById('camera-toggle-btn');
+    const exportDataBtn = document.getElementById('export-data-btn');
 
     // Filter buttons
     const filterBtns = document.querySelectorAll('.filter-btn');
@@ -183,13 +184,16 @@ function initAdmin() {
             return `
         <div class="admin-card ${isArchived ? 'archived' : ''}" data-id="${img.id}">
           <div class="card-image-wrap">
-            <img src="${img.image_path}" alt="${img.text || 'Photo'}" loading="lazy">
+            <img src="${img.image_path}" alt="${img.feedback || img.text || 'Photo'}" loading="lazy">
             <span class="card-status-badge ${badgeClass}">${badgeText}</span>
           </div>
           <div class="card-body">
-            <div class="card-text-display ${img.text ? '' : 'empty'}">
+            <div class="card-name-display ${img.name ? '' : 'empty'}">
+              ${img.name ? escapeHtml(img.name) : 'No name'}
+            </div>
+            <div class="card-text-display ${img.feedback || img.text ? '' : 'empty'}">
               <span class="card-color-dot" style="background:${img.bg_color}"></span>
-              ${img.text ? escapeHtml(img.text) : 'No text'}
+              ${img.feedback || img.text ? escapeHtml(img.feedback || img.text) : 'No feedback'}
             </div>
             <div class="card-meta">ID: ${img.id} · ${formatDate(img.created_at)}</div>
             <div class="card-actions">
@@ -389,12 +393,47 @@ function initAdmin() {
     });
 
     // ===========================
+    // EXPORT DATA
+    // ===========================
+    exportDataBtn.addEventListener('click', async () => {
+        try {
+            exportDataBtn.disabled = true;
+            const res = await fetch(`${BACKEND_URL}/api/admin/export`, {
+                headers: authHeadersNoJSON(),
+            });
+
+            if (res.status === 401 || res.status === 403) {
+                localStorage.removeItem(TOKEN_KEY);
+                window.location.href = '/login.html';
+                return;
+            }
+
+            if (!res.ok) throw new Error('Export failed');
+
+            const blob = await res.blob();
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `social-wall-export-${new Date().toISOString().slice(0, 10)}.csv`;
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            URL.revokeObjectURL(url);
+        } catch (err) {
+            console.error('Export failed:', err);
+            alert('Export failed. Please try again.');
+        } finally {
+            exportDataBtn.disabled = false;
+        }
+    });
+
+    // ===========================
     // EDIT MODAL
     // ===========================
     function openEditModal(id) {
         pendingEditId = id;
         const img = allImages.find(i => i.id === id);
-        editTextInput.value = img ? img.text : '';
+        editTextInput.value = img ? (img.feedback || img.text || '') : '';
         editModalOverlay.classList.add('visible');
         editTextInput.focus();
     }
@@ -406,12 +445,12 @@ function initAdmin() {
 
     editSave.addEventListener('click', async () => {
         if (!pendingEditId) return;
-        const text = editTextInput.value.trim().slice(0, 70);
+        const feedback = editTextInput.value.trim().slice(0, 70);
         try {
             const res = await fetch(`${BACKEND_URL}/api/admin/images/${pendingEditId}`, {
                 method: 'PUT',
                 headers: authHeaders(),
-                body: JSON.stringify({ text }),
+                body: JSON.stringify({ feedback }),
             });
             if (res.status === 401 || res.status === 403) {
                 localStorage.removeItem(TOKEN_KEY);

@@ -21,7 +21,7 @@ async function seedHttp() {
 
             const formData = new FormData();
             formData.append('image', blob, `dummy_${i}.jpg`);
-            formData.append('text', DUMMY_TEXTS[i - 1]);
+            formData.append('feedback', DUMMY_TEXTS[i - 1]);
 
             console.log(`[SEED] Uploading '${DUMMY_TEXTS[i - 1]}' to running server (this invokes AI rembg)...`);
 

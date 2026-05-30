@@ -53,12 +53,12 @@ async function seed() {
         try {
             await downloadImage(imgUrl, dest);
 
-            const text = DUMMY_TEXTS[i - 1];
+            const feedback = DUMMY_TEXTS[i - 1];
             const bgColor = getRandomColor();
 
             // Add to database
-            const newImage = addImage(`/uploads/${filename}`, text, bgColor);
-            console.log(`[SEED] Added: ${newImage.text} -> ${newImage.image_path}`);
+            const newImage = addImage(`/uploads/${filename}`, feedback, bgColor);
+            console.log(`[SEED] Added: ${newImage.feedback} -> ${newImage.image_path}`);
         } catch (e) {
             console.error(`[SEED] Error on image ${i}:`, e.message);
         }

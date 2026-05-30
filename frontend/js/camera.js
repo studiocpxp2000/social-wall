@@ -210,7 +210,8 @@ uploadBtn.addEventListener('click', async () => {
 
         const formData = new FormData();
         formData.append('image', capturedBlob, 'photo.png');
-        formData.append('text', feedback.slice(0, FEEDBACK_CHAR_LIMIT));
+        formData.append('name', name.slice(0, NAME_CHAR_LIMIT));
+        formData.append('feedback', feedback.slice(0, FEEDBACK_CHAR_LIMIT));
 
         const response = await fetch(`${BACKEND_URL}/api/upload`, {
             method: 'POST',

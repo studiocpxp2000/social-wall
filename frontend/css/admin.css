@@ -226,6 +226,20 @@ body {
     font-style: italic;
 }
 
+.card-name-display {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--accent-hover);
+    margin-bottom: 8px;
+    word-break: break-word;
+}
+
+.card-name-display.empty {
+    color: var(--text-muted);
+    font-style: italic;
+    font-weight: 500;
+}
+
 .card-color-dot {
     display: inline-block;
     width: 12px;

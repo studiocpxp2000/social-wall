@@ -65,7 +65,8 @@ router.post('/', upload.single('image'), async (req, res) => {
 
         console.log('[UPLOAD] File received:', req.file.originalname, req.file.size, 'bytes');
 
-        const text = (req.body.text || '').trim().slice(0, 70);
+        const name = (req.body.name || '').trim().slice(0, 30);
+        const feedback = (req.body.feedback || req.body.text || '').trim().slice(0, 70);
         const bgColor = getRandomColor();
 
         // Convert hex color to RGB for Sharp
@@ -105,7 +106,7 @@ router.post('/', upload.single('image'), async (req, res) => {
         console.log('[UPLOAD] Step 2: Final image saved');
 
         // Save to database
-        const newImage = addImage(`/uploads/${filename}`, text, bgColor);
+        const newImage = addImage(`/uploads/${filename}`, feedback, bgColor, name);
         console.log('[UPLOAD] Database result:', JSON.stringify(newImage));
 
         // Broadcast to all connected wall clients

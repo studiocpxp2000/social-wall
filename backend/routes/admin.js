@@ -5,7 +5,7 @@ const {
     getAllImages,
     getActiveImages,
     getImageById,
-    updateImageText,
+    updateImageFeedback,
     updateImageStatus,
     deleteImage,
     deleteAllImages,
@@ -31,17 +31,53 @@ router.get('/images', (req, res) => {
     }
 });
 
-// PUT /api/admin/images/:id — Edit image text
+// GET /api/admin/export - Export all image metadata as CSV
+function csvEscape(value) {
+    const str = String(value ?? '');
+    return `"${str.replace(/"/g, '""')}"`;
+}
+
+router.get('/export', (req, res) => {
+    try {
+        const images = getAllImages();
+        const columns = ['id', 'name', 'feedback', 'status', 'image_path', 'bg_color', 'created_at', 'updated_at'];
+        const rows = images.map(image => [
+            image.id,
+            image.name || '',
+            image.feedback || image.text || '',
+            image.status || '',
+            image.image_path || '',
+            image.bg_color || '',
+            image.created_at || '',
+            image.updated_at || '',
+        ]);
+
+        const csv = [
+            columns.map(csvEscape).join(','),
+            ...rows.map(row => row.map(csvEscape).join(',')),
+        ].join('\n');
+
+        const stamp = new Date().toISOString().slice(0, 10);
+        res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+        res.setHeader('Content-Disposition', `attachment; filename="social-wall-export-${stamp}.csv"`);
+        res.send(csv);
+    } catch (err) {
+        console.error('Export error:', err);
+        res.status(500).json({ error: 'Failed to export data' });
+    }
+});
+
+// PUT /api/admin/images/:id - Edit image feedback
 router.put('/images/:id', (req, res) => {
     try {
         const { id } = req.params;
-        const { text } = req.body;
+        const feedback = req.body.feedback ?? req.body.text;
 
         const image = getImageById(Number(id));
         if (!image) return res.status(404).json({ error: 'Image not found' });
 
-        const trimmedText = (text || '').trim().slice(0, 70);
-        const updated = updateImageText(Number(id), trimmedText);
+        const trimmedFeedback = (feedback || '').trim().slice(0, 70);
+        const updated = updateImageFeedback(Number(id), trimmedFeedback);
 
         const io = req.app.get('io');
         io.emit('update-image', updated);

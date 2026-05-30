@@ -56,13 +56,13 @@ const newImageIds = new Set(); // Tracks image IDs that are in the 5-second high
 // ===========================
 function createCardHTML(image) {
   if (!image) return "";
-  const text = image.text || "";
+  const feedback = image.feedback || image.text || "";
   // Check if this image ID is currently within its 5 second glowing window
   const newClass = newImageIds.has(image.id) ? " new-card highlight" : "";
   return `
     <div class="wall-card${newClass}" data-id="${image.id}">
-      <img class="card-avatar" src="${image.image_path}" alt="${text}" data-color="${image.bg_color || ""}" loading="lazy">
-      ${text ? `<span class="card-text">${escapeHtml(text)}</span>` : ""}
+      <img class="card-avatar" src="${image.image_path}" alt="${feedback}" data-color="${image.bg_color || ""}" loading="lazy">
+      ${feedback ? `<span class="card-text">${escapeHtml(feedback)}</span>` : ""}
     </div>
   `;
 }
@@ -165,13 +165,14 @@ function updateImageOnWall(image) {
     .querySelectorAll(`.wall-card[data-id="${image.id}"]`)
     .forEach((card) => {
       const textEl = card.querySelector(".card-text");
-      if (image.text) {
+      const feedback = image.feedback || image.text || "";
+      if (feedback) {
         if (textEl) {
-          textEl.textContent = image.text;
+          textEl.textContent = feedback;
         } else {
           card.insertAdjacentHTML(
             "beforeend",
-            `<span class="card-text">${escapeHtml(image.text)}</span>`,
+            `<span class="card-text">${escapeHtml(feedback)}</span>`,
           );
         }
       } else if (textEl) {

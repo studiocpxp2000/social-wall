@@ -29,7 +29,8 @@ async function initDatabase() {
     CREATE TABLE IF NOT EXISTS images (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       image_path TEXT NOT NULL,
-      text TEXT DEFAULT '',
+      name TEXT DEFAULT '',
+      feedback TEXT DEFAULT '',
       bg_color TEXT NOT NULL,
       status TEXT DEFAULT 'active',
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -37,8 +38,51 @@ async function initDatabase() {
     )
   `);
 
+    ensureColumn('images', 'name', "TEXT DEFAULT ''");
+    ensureColumn('images', 'feedback', "TEXT DEFAULT ''");
+    copyLegacyTextToFeedback();
+
     saveDatabase();
     return db;
+}
+
+function ensureColumn(tableName, columnName, definition) {
+    const stmt = db.prepare(`PRAGMA table_info(${tableName})`);
+    let exists = false;
+
+    while (stmt.step()) {
+        const row = stmt.getAsObject();
+        if (row.name === columnName) {
+            exists = true;
+            break;
+        }
+    }
+    stmt.free();
+
+    if (!exists) {
+        db.run(`ALTER TABLE ${tableName} ADD COLUMN ${columnName} ${definition}`);
+    }
+}
+
+function hasColumn(tableName, columnName) {
+    const stmt = db.prepare(`PRAGMA table_info(${tableName})`);
+    let exists = false;
+
+    while (stmt.step()) {
+        const row = stmt.getAsObject();
+        if (row.name === columnName) {
+            exists = true;
+            break;
+        }
+    }
+    stmt.free();
+    return exists;
+}
+
+function copyLegacyTextToFeedback() {
+    if (hasColumn('images', 'text')) {
+        db.run("UPDATE images SET feedback = text WHERE (feedback IS NULL OR feedback = '') AND text IS NOT NULL AND text != ''");
+    }
 }
 
 // Save database to file (call after every write operation)
@@ -80,8 +124,11 @@ function getImageById(id) {
     return result;
 }
 
-function addImage(imagePath, text, bgColor) {
-    db.run('INSERT INTO images (image_path, text, bg_color) VALUES (?, ?, ?)', [imagePath, text || '', bgColor]);
+function addImage(imagePath, feedback, bgColor, name = '') {
+    db.run(
+        'INSERT INTO images (image_path, name, feedback, bg_color) VALUES (?, ?, ?, ?)',
+        [imagePath, name || '', feedback || '', bgColor]
+    );
     saveDatabase();
 
     // Safely retrieve the newly inserted row to get the actual database ID 
@@ -96,8 +143,8 @@ function addImage(imagePath, text, bgColor) {
     return newImage;
 }
 
-function updateImageText(id, text) {
-    db.run('UPDATE images SET text = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?', [text, id]);
+function updateImageFeedback(id, feedback) {
+    db.run('UPDATE images SET feedback = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?', [feedback, id]);
     saveDatabase();
     return getImageById(id);
 }
@@ -127,7 +174,7 @@ module.exports = {
     getActiveImages,
     getImageById,
     addImage,
-    updateImageText,
+    updateImageFeedback,
     updateImageStatus,
     deleteImage,
     deleteAllImages,
