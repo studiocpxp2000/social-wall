@@ -13,15 +13,15 @@ const getBackendUrl = () => {
   }
   return "";
 };
-const BACKEND_URL = getBackendUrl();
+const BACKEND_URL = window.location.origin;
 
-console.log("[WALL] BACKEND_URL:", BACKEND_URL || window.location.origin);
+console.log("[WALL] BACKEND_URL:", BACKEND_URL);
 
-const socket = io(BACKEND_URL || window.location.origin, {
-  transports: ["websocket", "polling"],
+const socket = io(BACKEND_URL, {
   path: "/socket.io/",
+  transports: ["websocket", "polling"],
 });
- 
+
 console.log("[WALL] Socket.IO connecting...");
 
 socket.on("connect", () => {
