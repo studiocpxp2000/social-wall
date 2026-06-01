@@ -24,7 +24,7 @@
     --header-height: 10vh;
     --row-height: 19vh;
     --card-radius: 20vh;
-    --marquee-speed: 120s;
+    --marquee-speed: 250s;
 }
 
 html,
@@ -251,7 +251,7 @@ body {
 
 /* New card animation */
 .wall-card.new-card {
-    animation: card-pop-in 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    /* animation: card-pop-in 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); */
 }
 
 @keyframes card-pop-in {
@@ -268,7 +268,7 @@ body {
 
 /* 5-second highlight for new cards */
 .wall-card.highlight {
-    animation: highlight-pulse 1s alternate infinite, highlight-scale 5s forwards;
+    animation: highlight-pulse 1s alternate infinite;
     z-index: 10;
 }
 
